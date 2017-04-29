@@ -1,9 +1,9 @@
 window.onload = initPage; //call the initPage function as soon as the elements on the page have been loaded
-
+let selectedUser = {};
+	
 function initPage(){	
 	let form = $("#myform").show();
-	let selectedUser = {};
-	
+
 	/*** Get user list from dummy data  and create an user drowdown list***/
 	let userList = getUserList(); 	
 	if(userList.length >0 ){ 
@@ -53,23 +53,26 @@ function initPage(){
 				case currentIndex===0 :				
 					if(jQuery.isEmptyObject(selectedUser)){
 						return false;
-					} 
+					}
+
+					//generate html inputs based on the selectedUser's profile 
+					let profileInfo = createInputs(selectedUser);
+					if(profileInfo !== ""){ 
+					   $('#profileInfo').html(profileInfo); 
+					}else{
+					   $('#profileInfo').html(""); 
+						return false;
+					}				
 				break;
 				
 				 // generate review information based on the selectedUser object
-				case currentIndex===1 :
-					let reviewInfo = "";
-					Object.keys(selectedUser).map(function(key, index) {
-						//add a space before every uppercase character and trim off the leading spaces except ID field
-						let label = (key!=="ID"?key.replace(/([A-Z])/g, ' $1').trim():key);
-						
-						//make first character to uppercase 
-						label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
-					   
-						reviewInfo += "<label for='" + key + "'>" + label + "</label>";
-						reviewInfo += "<input name='" + key + "_r' type='text' value= '"+ selectedUser[key] +"' readonly>";	
-					});
+				case currentIndex===1 :	
+					if(jQuery.isEmptyObject(selectedUser)){
+						return false;
+					}
 					
+					//generate html inputs based on the selectedUser's profile 
+					let reviewInfo = createInputs(selectedUser, 'review');
 					if(reviewInfo !== ""){ 
 					   $('#reviewInfo').html(reviewInfo); 
 					}else{
@@ -160,77 +163,96 @@ function initPage(){
 				return false;
 			}
 		});
-	});
-	
-	/*** update selectedUser object when input fields changes***/
-	$('#firstName').change(function() { 
-		selectedUser.firstName = $(this).val(); 
-	});
-	
-	$('#lastName').change(function() { 
-		selectedUser.lastName = $(this).val(); 
-	});
-	
-	$('#phone').change(function() { 
-		selectedUser.phone = $(this).val(); 
-	});
-	
-	$('#email').change(function() { 
-		selectedUser.email = $(this).val(); 
-	});
+	});	
 }
 
-function prefillInputs(obj){
-	if(obj === undefined ) {
+function prefillInputs(selectedObj){
+	if(selectedObj === undefined ) {
 		return false;
 	}
 	
 	//assigned object values onto steps 2 inputs
-	$('#ID').val(obj.ID);
-	$('#firstName').val(obj.firstName);
-	$('#lastName').val(obj.lastName);
-	$('#phone').val(obj.phone);
-	$('#email').val(obj.email);
+	Object.keys(selectedObj).map(function(key, index) {
+		$('#'+key).val(selectedObj[key]);	
+	});
+	
 	return true;
 }
 
+function onInputChange(inputObj){
+	//update selectedUser object when input fields changes
+	selectedUser[inputObj.id] = inputObj.value;
+	return true;
+}
+
+function createInputs(selectedObj, steps=''){
+	if(selectedObj === undefined ) {
+		return "";
+	}
+	let html = "";  //input fields to display on UI
+
+	Object.keys(selectedObj).map(function(key, index) {
+		//add a space before every uppercase character and trim off the leading spaces except ID field
+		let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);
+				
+		//make first character to uppercase 
+		label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
+	
+		//append steps on input name
+		let name = (steps !== ''? key + "_" + steps:key);		
+				
+		//add extraAttr attributes/actions based on steps. Note. ID field is readonly no matter what step it is		
+		let extraAttr = (steps==='review' || key === "ID"?"readonly":"onchange='onInputChange(this)'"); 	
+		
+		//generate html 
+		html += "<label for='" + name + "'>" + label + "</label>";
+		html += "<input id='" + name + "' name='" + name + "' type='text' value= '"+ selectedObj[key] +"' "+extraAttr+" >";	
+	});
+	return html;
+}
+
 function getUserList(){
-	//use dummy data 
+	//use dummy data. It could have different attributes. createInputs function will generate input fields based on the user profile
 	return [
 		{
 			ID: "1001",
 			firstName: "Vickie",
 			lastName: "Chen",
 			phone: "470-285-5688",
-			email: "vickie_tree@hotmail.com"		
+			email: "vickie_tree@hotmail.com",
+			createdDate: '2017-04-29'
 		},
 		{
 			ID: "1002",
 			firstName: "Joe",
 			lastName: "Don",
 			phone: "123-456-7898",
-			email: "joedon@vickietesting.com"			
+			email: "joedon@vickietesting.com",
+			createdDate: '2017-04-29'			
 		},
 		{
 			ID: "1003",
 			firstName: "Aaron",
 			lastName: "Wood",
 			phone: "111-222-3333",
-			email: "araonwood@vickietesting.com"			
+			email: "araonwood@vickietesting.com",
+			createdDate: '2017-04-29'			
 		},
 		{
 			ID: "1004",
 			firstName: "Hanna",
 			lastName: "Mills",
 			phone: "234-234-2345",
-			email: "hannamills@vickietesting.com"			
+			email: "hannamills@vickietesting.com",
+			createdDate: '2017-04-29'			
 		},
 		{
 			ID: "1005",
 			firstName: "Taylor",
 			lastName: "House",
 			phone: "100-200-3000",
-			email: "taylorhouse@vickietesting.com"			
+			email: "taylorhouse@vickietesting.com",
+			createdDate: '2017-04-29'			
 		}			
 	];	
 }
