@@ -103,7 +103,7 @@ function initPage(){
 				$(".actions a:eq(1)").text("Next");
 			}
 			
-			//hied previous button on Completed Step and disable trigger action on Tabs
+			//hide previous button on Completed Step and disable trigger action on Tabs
 		 	if(currentIndex===3){  
 			    $(".actions a:eq(0)").hide();
 				$(".actions a:eq(3)").hide();
