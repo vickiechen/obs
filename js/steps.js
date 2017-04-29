@@ -219,40 +219,35 @@ function getUserList(){
 			firstName: "Vickie",
 			lastName: "Chen",
 			phone: "470-285-5688",
-			email: "vickie_tree@hotmail.com",
-			createdDate: '2017-04-29'
+			email: "vickie_tree@hotmail.com"
 		},
 		{
 			ID: "1002",
 			firstName: "Joe",
 			lastName: "Don",
 			phone: "123-456-7898",
-			email: "joedon@vickietesting.com",
-			createdDate: '2017-04-29'			
+			email: "joedon@vickietesting.com"
 		},
 		{
 			ID: "1003",
 			firstName: "Aaron",
 			lastName: "Wood",
 			phone: "111-222-3333",
-			email: "araonwood@vickietesting.com",
-			createdDate: '2017-04-29'			
+			email: "araonwood@vickietesting.com"
 		},
 		{
 			ID: "1004",
 			firstName: "Hanna",
 			lastName: "Mills",
 			phone: "234-234-2345",
-			email: "hannamills@vickietesting.com",
-			createdDate: '2017-04-29'			
+			email: "hannamills@vickietesting.com"
 		},
 		{
 			ID: "1005",
 			firstName: "Taylor",
 			lastName: "House",
 			phone: "100-200-3000",
-			email: "taylorhouse@vickietesting.com",
-			createdDate: '2017-04-29'			
+			email: "taylorhouse@vickietesting.com"
 		}			
 	];	
 }
