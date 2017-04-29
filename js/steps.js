@@ -4,7 +4,7 @@ function initPage(){
 	let form = $("#myform").show();
 	let selectedUser = {};
 	
-	/*** Get user list from dummy data  and create user list selection ***/
+	/*** Get user list from dummy data  and create an user drowdown list***/
 	let userList = getUserList(); 	
 	if(userList.length >0 ){ 
 		let userOptions = "<select id='userList'><option value = ''>Please select user from list</option>";
@@ -15,7 +15,7 @@ function initPage(){
 		userOptions += "</select>"
 		$("#userOptions").html(userOptions);
 	}else{
-		$("#userOptions").html("Oops We are having a problem getting User List!");
+		$("#userOptions").html("Oops We are having a problem getting User List. Please try again Later!");
 	}	
 	
 	/*** Steps attributes and actions ***/
@@ -36,53 +36,58 @@ function initPage(){
         },	
 		onStepChanging: function (event, currentIndex, newIndex) {
 		
-			// Allways allow previous action even if the current form is not valid!
+			// allways allow previous action even if the current form is not valid!
 			if (currentIndex > newIndex){
 				return true;
 			}
 			
-			// Needed in some cases if the user went back (clean up)
+			// needed in some cases if the user went back (clean up)
 			if (currentIndex < newIndex){
 				// To remove error styles
 				form.find(".body:eq(" + newIndex + ") label.error").remove();
 				form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
 			}
 			
-			// Validate selectedUser object. Return false if it is empty!
-			if(currentIndex===0){ 
-				if(jQuery.isEmptyObject(selectedUser)){
-					return false;
-				} 
-			}
-			
-			//generate review information based on the selectedUser object
-			if(currentIndex===1){  
-				let reviewInfo = "";
-				Object.keys(selectedUser).map(function(key, index) {
-					//add a space before every uppercase character and trim off the leading spaces except ID field
-			        let label = (key!=="ID"?key.replace(/([A-Z])/g, ' $1').trim():key);
-					
-					//make first character to uppercase 
-					label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
-				   
-					reviewInfo += "<label for='" + key + "'>" + label + "</label>";
-					reviewInfo += "<input name='" + key + "_r' type='text' value= '"+ selectedUser[key] +"' readonly>";	
-				});
+			switch(true){
+				// validate selectedUser object. Return false if it is empty!	
+				case currentIndex===0 :				
+					if(jQuery.isEmptyObject(selectedUser)){
+						return false;
+					} 
+				break;
 				
-				if(reviewInfo !== ""){ 
-				   $('#reviewInfo').html(reviewInfo); 
-				}else{
-				   $('#reviewInfo').html(""); 
-					return false;
-				}					
+				 // generate review information based on the selectedUser object
+				case currentIndex===1 :
+					let reviewInfo = "";
+					Object.keys(selectedUser).map(function(key, index) {
+						//add a space before every uppercase character and trim off the leading spaces except ID field
+						let label = (key!=="ID"?key.replace(/([A-Z])/g, ' $1').trim():key);
+						
+						//make first character to uppercase 
+						label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
+					   
+						reviewInfo += "<label for='" + key + "'>" + label + "</label>";
+						reviewInfo += "<input name='" + key + "_r' type='text' value= '"+ selectedUser[key] +"' readonly>";	
+					});
+					
+					if(reviewInfo !== ""){ 
+					   $('#reviewInfo').html(reviewInfo); 
+					}else{
+					   $('#reviewInfo').html(""); 
+						return false;
+					}				
+				break;
+				
+				//assuming we update user information successfully, display result on UI
+				case currentIndex===2 :						
+					let res = "<p>The changes have beed made successfully. Thank you!</p>"; 
+					$("#status").html(res);			
+				break;
+				
+				default:
+
 			}
-			
-			if(currentIndex===2){
-				//assuming we update user successfully, display result on UI
-				let res = "<p>The changes have beed made successfully. Thank you!</p>"; 
-				$("#status").html(res);				
-			}
-			
+						
 			form.validate().settings.ignore = ":disabled,:hidden";
 			return form.valid();
 		},
@@ -95,7 +100,7 @@ function initPage(){
 				$(".actions a:eq(1)").text("Next");
 			}
 			
-			//hied previous button on Completed Step and disable trigger on Tabs
+			//hied previous button on Completed Step and disable trigger action on Tabs
 		 	if(currentIndex===3){  
 			    $(".actions a:eq(0)").hide();
 				$(".actions a:eq(3)").hide();
@@ -109,7 +114,9 @@ function initPage(){
 			form.submit();  		
 		}
 	}).validate({
-		errorPlacement: function errorPlacement(error, element) { element.before(error); },
+		errorPlacement: function errorPlacement(error, element) {
+			element.before(error); 
+		},
 		rules: {
 			firstName: {
 				required: true,
@@ -178,7 +185,7 @@ function prefillInputs(obj){
 		return false;
 	}
 	
-	//assigned object values into steps 2 inputs
+	//assigned object values onto steps 2 inputs
 	$('#ID').val(obj.ID);
 	$('#firstName').val(obj.firstName);
 	$('#lastName').val(obj.lastName);
@@ -202,7 +209,28 @@ function getUserList(){
 			firstName: "Joe",
 			lastName: "Don",
 			phone: "123-456-7898",
-			email: "joedon@hotmail.com"			
-		}					
+			email: "joedon@vickietesting.com"			
+		},
+		{
+			ID: "1003",
+			firstName: "Aaron",
+			lastName: "Wood",
+			phone: "111-222-3333",
+			email: "araonwood@vickietesting.com"			
+		},
+		{
+			ID: "1004",
+			firstName: "Hanna",
+			lastName: "Mills",
+			phone: "234-234-2345",
+			email: "hannamills@vickietesting.com"			
+		},
+		{
+			ID: "1005",
+			firstName: "Taylor",
+			lastName: "House",
+			phone: "100-200-3000",
+			email: "taylorhouse@vickietesting.com"			
+		}			
 	];	
 }
