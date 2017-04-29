@@ -1,1 +1,1 @@
-The user setup wizard using jquery
+The user setup wizard using jquery, jquery steps, and jquery validate
