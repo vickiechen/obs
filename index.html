@@ -8,24 +8,25 @@
 		<script src="lib/jquery.validate.js"></script> 
         <script src="lib/jquery.steps.js"></script>
 		<script src="js/steps.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600">
 		<link rel="stylesheet" type="text/css" href="lib/steps.css">
 		<link rel="stylesheet" type="text/css" href="css/my.css">
     </head>
     <body>
 		<h2>Jquery Steps Example</h2>
-        <form id="myform" action="#">
+		<form id="myform" action="#">
 			<h3>Pick A User</h3>
 			<fieldset>
 				<legend>Select User</legend>
-				<div id="userOptions"/ >				
+				<div id="userOptions"/ >	
 			</fieldset>
-			
+					
 			<h3>Edit Profile</h3>
 			<fieldset>
-				<legend>Profile Information</legend>		 
-				<div id="profileInfo" />
-				<p>(*) Mandatory</p>
+				<legend>Profile Information</legend>
+				<p>All fields are Mandatory and only digits on expense fields</p>		
+				<div id="profileInfo" />					
 			</fieldset>
 		 
 			<h3>Review</h3>
@@ -39,7 +40,8 @@
 			<fieldset>
 				<legend>Status</legend>
 				<div id="status" />				
-			</fieldset>
+			</fieldset>			
+			<canvas id="myChart" width="300" height="200" style="display:none"></canvas>				
 		</form>
     </body>
 </html>

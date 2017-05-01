@@ -1,6 +1,7 @@
 window.onload = initPage; //call the initPage function as soon as the elements on the page have been loaded
 let selectedUser = {};
-	
+let expenseKeys = ["saving","investment","mortage","rent","insurance","otherExpense"];	
+
 function initPage(){	
 	let form = $("#myform").show();
 
@@ -29,7 +30,8 @@ function initPage(){
 		   //empty all input fields and reset selected object to empty
 			selectedUser = {};
 			$("#userList").val('');
-			$("#myform").find("input[type=text]").val("");	
+			$("#myform").find("input[type=text]").val('');	
+			$('#warningMsg').html('');
 			
 			// go to the first step
 			$('#myform-t-0').click();
@@ -83,8 +85,32 @@ function initPage(){
 				
 				//assuming we update user information successfully, display result on UI
 				case currentIndex===2 :						
-					let res = "<p>The changes have beed made successfully. Thank you!</p>"; 
-					$("#status").html(res);			
+					let res = "<p>The changes have beed made successfully. Thank you!</p><p>Your Yearly Expense Report: </p>"; 
+					$("#status").html(res);		
+				
+					let chartData = getReportData(selectedUser);
+					let chartOptions = {
+						showTooltips: true,
+						tooltips: {
+							callbacks: {
+								label: function (tooltipItem, data){
+									let label = data.labels[tooltipItem.index] ;
+									let value = parseInt(data.datasets[0]['data'][tooltipItem.index]); 									
+									return  label + "  : $" + value ;
+								}
+							}
+						}
+
+					};
+					if(chartData){
+						var ctx = document.getElementById('myChart').getContext('2d');
+						var myChart = new Chart(ctx, {
+							type: 'pie',
+							data: chartData,
+							options: chartOptions
+						});
+						$('#myChart').show();		
+					}						
 				break;
 				
 				default:
@@ -113,7 +139,7 @@ function initPage(){
 		onFinishing: function (event, currentIndex) {
 			return form.valid();
 		},
-		onFinished: function (event, currentIndex){	
+		onFinished: function (event, currentIndex){			
 			form.submit();  		
 		}
 	}).validate({
@@ -137,7 +163,14 @@ function initPage(){
 			email:{
 				required: true,
 				email: true
-			}
+			},
+			income: {required: true, digits: true,  minlength: 1, min: 0 },
+			saving: {required: true, digits: true,  minlength: 1, min: 0 },
+			investment: {required: true, digits: true,  minlength: 1, min: 0 },
+			mortage: {required: true, digits: true,  minlength: 1, min: 0 },
+			rent: {required: true, digits: true,  minlength: 1, min: 0 },
+			insurance: {required: true, digits: true,  minlength: 1, min: 0 },
+			otherExpense: {required: true, digits: true,  minlength: 1, min: 0 }
 		}
 	});
 	
@@ -146,7 +179,7 @@ function initPage(){
 		phone_number = phone_number.replace(/\s+/g, ''); 
 		return this.optional(element) || phone_number.length > 9 &&	phone_number.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/);
 	}, 'Please enter a valid phone number.');
-		
+			
 	/*** update selectedUser object when a user is selected from the user list***/
 	$("#userList").change(function (){ 	
 		let selectedID = $(this).val(); 
@@ -157,13 +190,85 @@ function initPage(){
 		}
 
 		$.each( getUserList() , function( key, obj ) { 		
-			if(obj.ID == selectedID){	
+			if(obj.ID == selectedID){
 				selectedUser = obj; 
 				prefillInputs(obj);			
 				return false;
 			}
 		});
 	});	
+
+	$('#myChart').html('').hide();			
+	
+}
+
+function getReportData(selectedObj) {
+	if(selectedObj === undefined ) {
+		return false;
+	}
+	
+	let labels = [];
+	let data = [];
+	let backgroundColor = [];	
+	
+	Object.keys(selectedObj).map(function(key, index) {		
+		if($.inArray( key, expenseKeys)!==-1){		
+			//random a backgroud color for a slice
+			let sliceColor = getRandomColor();
+			
+			 //avoid the same background color in backgroundColor array
+			while( $.inArray( sliceColor, backgroundColor) !==-1  ){
+				sliceColor = getRandomColor();				
+			}
+			
+			//computed slice value from monthly to yearly
+			let sliceValue =  parseInt( selectedObj[key] )*12;			
+	
+			//add a space before every uppercase character and trim off the leading spaces except ID field
+			let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);	
+			
+			//make first character to uppercase 
+			label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
+
+			labels.push(label);			
+			data.push(sliceValue);
+			backgroundColor.push(sliceColor);
+			
+		}
+	});
+	
+	if(data.length > 0 ){	
+		let chartData = {
+			labels :labels,
+			datasets : [{
+				data : data,
+				backgroundColor: backgroundColor
+			}]		
+		};
+		return chartData;
+	}else{
+		return false; //no chartData
+	}	
+}
+
+function getTotalExpense(selectedObj){
+	if(selectedObj == undefined ) {
+		return false;
+	}
+	
+	let total = 0;
+	//sum up total expense via all expense inputs
+	Object.keys(selectedObj).map(function(key, index) {
+		if($.inArray( key, expenseKeys)!==-1){	
+			let expense = parseInt($('#'+key).val());
+			total += expense ;	
+		}
+	});
+	if(!isNaN(total)){
+		return total;
+	}else{
+		return false;
+	}
 }
 
 function prefillInputs(selectedObj){
@@ -182,7 +287,30 @@ function prefillInputs(selectedObj){
 function onInputChange(inputObj){
 	//update selectedUser object when input fields changes
 	selectedUser[inputObj.id] = inputObj.value;
-	return true;
+	
+	let total = getTotalExpense(selectedUser);
+	if(total!==false){
+		let monthlyIncome = (parseInt($('#income').val())*0.75)/12; //assuming tax rate is 25%
+		if(total > monthlyIncome) {
+			let msg = "<p id='warningTotalMsg'> [WARN]: Your monthly expense $"+total+" is greater than your monthly net income $"+monthlyIncome+" (25% tax rate). Unless you have other income does not list above, please update your expense before you hit on the next button</p>";
+					
+			if($('#warningTotalMsg').length === 0) { //if $('#warningTotalMsg') doesnt exist, append this id with the warnning message
+				$('#totalExpense').parent().append(msg);
+			}else{ // //if $('#warningTotalMsg') exist, update the warnning message
+				$('#warningTotalMsg').html(msg);
+			}
+		}else{
+			$('#warningTotalMsg').html('');
+		}
+		//update totalExpense on totalExpense input Object 
+		$('#totalExpense').val(total);
+		
+		//update totalExpense on selectUser Object 
+		selectedUser['totalExpense'] = total;
+		return true;
+	}else{
+		return false;
+	}	
 }
 
 function createInputs(selectedObj, steps=''){
@@ -193,19 +321,23 @@ function createInputs(selectedObj, steps=''){
 
 	Object.keys(selectedObj).map(function(key, index) {
 		//add a space before every uppercase character and trim off the leading spaces except ID field
-		let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);
+		let label = (key !== "ID" && key!=="totalExpense" ? key.replace(/([A-Z])/g, ' $1').trim():key);
 				
 		//make first character to uppercase 
 		label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
-	
+			
 		//append steps on input name
 		let name = (steps !== ''? key + "_" + steps:key);		
 				
 		//add extraAttr attributes/actions based on steps. Note. ID field is readonly no matter what step it is		
-		let extraAttr = (steps==='review' || key === "ID"?"readonly":"onchange='onInputChange(this)'"); 	
+		let extraAttr = ( steps==='review' || key === "ID" || key ==="totalExpense" ? "readonly":"onkeyup='onInputChange(this)'"); 	
 		
 		//generate html 
-		html += "<label for='" + name + "'>" + label + "</label>";
+		if($.inArray( key, expenseKeys)!==-1){	
+			html += "<label for='" + name + "'>" + label + " Per Month</label>";
+		}else{
+			html += "<label for='" + name + "'>" + label + "</label>";
+		}
 		html += "<input id='" + name + "' name='" + name + "' type='text' value= '"+ selectedObj[key] +"' "+extraAttr+" >";	
 	});
 	return html;
@@ -219,35 +351,84 @@ function getUserList(){
 			firstName: "Vickie",
 			lastName: "Chen",
 			phone: "470-285-5688",
-			email: "vickie_tree@hotmail.com"
+			email: "vickie_tree@hotmail.com", 
+			income: 100000,
+			saving: 500,
+			investment: 500,
+			mortage: 1000,
+			rent: 0,
+			insurance: 888,
+			otherExpense: 600,
+			totalExpense: 3488
 		},
 		{
 			ID: "1002",
 			firstName: "Joe",
 			lastName: "Don",
 			phone: "123-456-7898",
-			email: "joedon@vickietesting.com"
+			email: "joedon@vickietesting.com",
+			income: 80000,
+			saving: 200,
+			investment: 100,
+			mortage: 0,
+			rent: 900,
+			insurance: 725,
+			otherExpense: 1000,
+			totalExpense: 2925
 		},
 		{
 			ID: "1003",
 			firstName: "Aaron",
 			lastName: "Wood",
 			phone: "111-222-3333",
-			email: "araonwood@vickietesting.com"
+			email: "araonwood@vickietesting.com",
+			income: 120000,
+			saving: 400,
+			investment: 800,
+			mortage: 1200,
+			rent: 0,
+			insurance: 890,
+			otherExpense: 1150,
+			totalExpense: 4440
 		},
 		{
 			ID: "1004",
 			firstName: "Hanna",
 			lastName: "Mills",
 			phone: "234-234-2345",
-			email: "hannamills@vickietesting.com"
+			email: "hannamills@vickietesting.com",
+			income: 50000,
+			saving: 0,
+			investment: 0,
+			mortage: 0,
+			rent: 700,
+			insurance: 700,
+			otherExpense: 900,
+			totalExpense: 2300
 		},
 		{
 			ID: "1005",
 			firstName: "Taylor",
 			lastName: "House",
 			phone: "100-200-3000",
-			email: "taylorhouse@vickietesting.com"
+			email: "taylorhouse@vickietesting.com",
+			income: 2000,
+			saving: 0,
+			investment: 0,
+			mortage: 0,
+			rent: 500,
+			insurance: 500,
+			otherExpense: 500,
+			totalExpense: 1500
 		}			
 	];	
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
