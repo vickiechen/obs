@@ -349,7 +349,7 @@ function createInputs(selectedObj, steps){
 		if($.inArray( key, expenseKeys)!==-1){	
 			html += "<label for='" + name + "'>" + label + " Per Month</label>";
 		}else{
-			html += "<label for='" + name + "'>" + label + "</label>";
+			html += "<label for='" + name + "'>" + ( key ==="totalExpense"?"Total Expense":label ) + "</label>";
 		}
 		html += "<input id='" + name + "' name='" + name + "' type='text' value= '"+ selectedObj[key] +"' "+extraAttr+" >";	
 	});
@@ -445,3 +445,4 @@ function getUserList(){
 		}			
 	];	
 }
+
