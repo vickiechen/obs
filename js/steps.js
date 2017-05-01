@@ -264,7 +264,7 @@ function getReportData(selectedObj, reportType) {
 		}else{
 			if(key === 'income' || key === 'totalExpense'){
 				//computed slice value from monthly to yearly
-				let sliceValue = selectedObj[key];
+				let sliceValue = (key === 'income'?selectedObj[key]:parseInt( selectedObj[key] )*12);
 				
 				//add a space before every uppercase character and trim off the leading spaces except ID field
 				let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);	
