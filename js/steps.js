@@ -85,7 +85,7 @@ function initPage(){
 				
 				//assuming we update user information successfully, display result on UI
 				case currentIndex===2 :						
-					let res = "<p>The changes have beed made successfully. Thank you!</p><p>Your Yearly Expense Report: </p>"; 
+					let res = "<h4>The changes have beed made successfully. Thank you!</h4><h5>Your Yearly Expense Report: </h5>"; 
 					$("#status").html(res);		
 				
 					let chartData = getReportData(selectedUser);
@@ -98,6 +98,32 @@ function initPage(){
 									let value = parseInt(data.datasets[0]['data'][tooltipItem.index]); 									
 									return  label + "  : $" + value ;
 								}
+							}
+						},
+						legend: {
+							labels: {
+								generateLabels: function(chart) {
+									let data  =  chart.data;
+									if (data.labels.length && data.datasets.length) {
+										return data.labels.map(function(label, i) {
+											return {
+												text: label + ' ($' + data.datasets[0].data[i] + ')',
+												initailValue: data.datasets[0].data[i],
+												initailText : label,
+												fillStyle: data.datasets[0].backgroundColor[i],
+												hidden: isNaN(data.datasets[0].data[i]),
+
+												// Extra data used for toggling the correct item
+												index: i
+											};
+										});
+									} else {
+										return [];
+									}
+								}
+							},
+							onClick: function (event, legendItem){ 
+								console.log("You click on legend Item: ",legendItem);
 							}
 						}
 
