@@ -58,7 +58,7 @@ function initPage(){
 					}
 
 					//generate html inputs based on the selectedUser's profile 
-					let profileInfo = createInputs(selectedUser);
+					let profileInfo = createInputs(selectedUser,'');
 					if(profileInfo !== ""){ 
 					   $('#profileInfo').html(profileInfo); 
 					}else{
@@ -192,7 +192,7 @@ function initPage(){
 		phone_number = phone_number.replace(/\s+/g, ''); 
 		return this.optional(element) || phone_number.length > 9 &&	phone_number.match(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/);
 	}, 'Please enter a valid phone number.');
-			
+		
 	/*** update selectedUser object when a user is selected from the user list***/
 	$("#userList").change(function (){ 	
 		let selectedID = $(this).val(); 
@@ -326,7 +326,7 @@ function onInputChange(inputObj){
 	}	
 }
 
-function createInputs(selectedObj, steps=''){
+function createInputs(selectedObj, steps){
 	if(selectedObj === undefined ) {
 		return "";
 	}
