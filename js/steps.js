@@ -85,10 +85,10 @@ function initPage(){
 				
 				//assuming we update user information successfully, display result on UI
 				case currentIndex===2 :						
-					let res = "<h4>The changes have beed made successfully. Thank you!</h4><h5>Your Yearly Expense Report: </h5>"; 
+					let res = "<h4>The changes have beed made successfully. Thank you!</h4><h5>Your Yearly Expense Reports: </h5>"; 
 					$("#status").html(res);		
 				
-					let chartData = getReportData(selectedUser);
+					let chartData = getReportData(selectedUser,'expense');
 					let chartOptions = {
 						showTooltips: true,
 						tooltips: {
@@ -136,7 +136,18 @@ function initPage(){
 							options: chartOptions
 						});
 						$('#myChart').show();		
-					}						
+					}
+
+					let chartData1 = getReportData(selectedUser, 'incomeExpense');
+					if(chartData1){
+						var ctx1 = document.getElementById('myChart1').getContext('2d');
+						var myChart1= new Chart(ctx1, {
+							type: 'pie',
+							data: chartData1,
+							options: chartOptions
+						});
+						$('#myChart1').show();		
+					}									
 				break;
 				
 				default:
@@ -211,42 +222,59 @@ function initPage(){
 		});
 	});	
 
-	$('#myChart').html('').hide();			
+	$('#myChart').html('').hide();
+	$('#myChart1').html('').hide();	
 	
 }
 
-function getReportData(selectedObj) {
+function getReportData(selectedObj, reportType) {
 	if(selectedObj === undefined ) {
 		return false;
 	}
 	
 	let labels = [];
 	let data = [];
-	let backgroundColor = [];	
+	let backgroundColor = (reportType === 'expense'?[]:['#77bfdc','#0b284e']);	
 	
-	Object.keys(selectedObj).map(function(key, index) {		
-		if($.inArray( key, expenseKeys)!==-1){		
-			//random a backgroud color for a slice
-			let sliceColor = getRandomColor();
-			
-			 //avoid the same background color in backgroundColor array
-			while( $.inArray( sliceColor, backgroundColor) !==-1  ){
-				sliceColor = getRandomColor();				
-			}
-			
-			//computed slice value from monthly to yearly
-			let sliceValue =  parseInt( selectedObj[key] )*12;			
-	
-			//add a space before every uppercase character and trim off the leading spaces except ID field
-			let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);	
-			
-			//make first character to uppercase 
-			label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
+	Object.keys(selectedObj).map(function(key, index) {	
+		if(reportType === 'expense'){
+			if($.inArray( key, expenseKeys)!==-1){		
+				//random a backgroud color for a slice
+				let sliceColor = getRandomColor();
+				
+				 //avoid the same background color in backgroundColor array
+				while( $.inArray( sliceColor, backgroundColor) !==-1  ){
+					sliceColor = getRandomColor();				
+				}
+				
+				//computed slice value from monthly to yearly
+				let sliceValue =  parseInt( selectedObj[key] )*12;			
+		
+				//add a space before every uppercase character and trim off the leading spaces except ID field
+				let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);	
+				
+				//make first character to uppercase 
+				label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
 
-			labels.push(label);			
-			data.push(sliceValue);
-			backgroundColor.push(sliceColor);
-			
+				labels.push(label);			
+				data.push(sliceValue);
+				backgroundColor.push(sliceColor);
+				
+			}
+		}else{
+			if(key === 'income' || key === 'totalExpense'){
+				//computed slice value from monthly to yearly
+				let sliceValue = selectedObj[key];
+				
+				//add a space before every uppercase character and trim off the leading spaces except ID field
+				let label = (key !== "ID" ? key.replace(/([A-Z])/g, ' $1').trim():key);	
+				
+				//make first character to uppercase 
+				label = label.replace(/\b[a-z]/g,function(f){return f.toUpperCase();});
+				
+				labels.push(label);			
+				data.push(sliceValue);				
+			}
 		}
 	});
 	
@@ -258,6 +286,7 @@ function getReportData(selectedObj) {
 				backgroundColor: backgroundColor
 			}]		
 		};
+		
 		return chartData;
 	}else{
 		return false; //no chartData
