@@ -147,23 +147,10 @@ function initPage(){
 			element.before(error); 
 		},
 		rules: {
-			firstName: {
-				required: true,
-				minlength: 1
-			},
-			lastName: {
-				required: true,
-				minlength: 1
-			},
-			phone: {
-				required: true,
-				minlength: 10,
-				phoneUS: true
-			}, 
-			email:{
-				required: true,
-				email: true
-			},
+			firstName: { required: true, minlength: 1 },
+			lastName: {	required: true, minlength: 1 },
+			phone: { required: true, minlength: 10,	phoneUS: true }, 
+			email:{	required: true, email: true },
 			income: {required: true, digits: true,  minlength: 1, min: 0 },
 			saving: {required: true, digits: true,  minlength: 1, min: 0 },
 			investment: {required: true, digits: true,  minlength: 1, min: 0 },
@@ -292,7 +279,7 @@ function onInputChange(inputObj){
 	if(total!==false){
 		let monthlyIncome = (parseInt($('#income').val())*0.75)/12; //assuming tax rate is 25%
 		if(total > monthlyIncome) {
-			let msg = "<p id='warningTotalMsg'> [WARN]: Your monthly expense $"+total+" is greater than your monthly net income $"+monthlyIncome+" (25% tax rate). Unless you have other income does not list above, please update your expense before you hit on the next button</p>";
+			let msg = "<p id='warningTotalMsg'> [WARN]: Your monthly expense $"+total+" is greater than your monthly net income $"+monthlyIncome+" (25% tax rate). Unless you have other income does not list above, please adjust your expense before you hit on the next button</p>";
 					
 			if($('#warningTotalMsg').length === 0) { //if $('#warningTotalMsg') doesnt exist, append this id with the warnning message
 				$('#totalExpense').parent().append(msg);
@@ -341,6 +328,15 @@ function createInputs(selectedObj, steps=''){
 		html += "<input id='" + name + "' name='" + name + "' type='text' value= '"+ selectedObj[key] +"' "+extraAttr+" >";	
 	});
 	return html;
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
 
 function getUserList(){
@@ -422,13 +418,4 @@ function getUserList(){
 			totalExpense: 1500
 		}			
 	];	
-}
-
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
 }
