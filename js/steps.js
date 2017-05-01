@@ -346,11 +346,17 @@ function createInputs(selectedObj, steps){
 		let extraAttr = ( steps==='review' || key === "ID" || key ==="totalExpense" ? "readonly":"onkeyup='onInputChange(this)'"); 	
 		
 		//generate html 
+		let labelDisplay = label;
 		if($.inArray( key, expenseKeys)!==-1){	
-			html += "<label for='" + name + "'>" + label + " Per Month</label>";
+			 labelDisplay =  label + " Per Month";
 		}else{
-			html += "<label for='" + name + "'>" + ( key ==="totalExpense"?"Total Expense":label ) + "</label>";
+			if(key ==="totalExpense"){
+				labelDisplay = "Total Montly Expense";
+			}else if(key ==="income"){
+				labelDisplay = "Income Per Year";
+			}
 		}
+		html += "<label for='" + name + "'>" + labelDisplay + "</label>";
 		html += "<input id='" + name + "' name='" + name + "' type='text' value= '"+ selectedObj[key] +"' "+extraAttr+" >";	
 	});
 	return html;
@@ -445,4 +451,3 @@ function getUserList(){
 		}			
 	];	
 }
-
